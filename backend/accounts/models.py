@@ -31,9 +31,12 @@ class CustomUser(AbstractUser):
 
 
 class NormalUserProfile(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name="profile")
-    form_link = models.URLField(blank=True, null=True)
-    powerbi_link = models.URLField(blank=True, null=True)
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    form_link1 = models.CharField(max_length=500, blank=True, null=True)
+    form_link2 = models.CharField(max_length=500, blank=True, null=True)
+    form_link3 = models.CharField(max_length=500, blank=True, null=True)
+    powerbi_link = models.CharField(max_length=500, blank=True, null=True)
+
 
     def __str__(self):
         return f"{self.user.email} - Perfil Normal"

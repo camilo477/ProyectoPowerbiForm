@@ -9,7 +9,7 @@ User = get_user_model()
 class NormalUserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = NormalUserProfile
-        fields = ["form_link", "powerbi_link"]
+        fields = ["form_link1", "form_link2", "form_link3", "powerbi_link"]
 
 
 class CustomUserSerializer(serializers.ModelSerializer):

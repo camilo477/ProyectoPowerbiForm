@@ -13,7 +13,7 @@ export function AuthProvider({ children }) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
-      credentials: "include"
+      credentials: "include",
     });
 
     const data = await res.json();
@@ -37,8 +37,10 @@ export function AuthProvider({ children }) {
         ...data,
         id: sessionData.id || null,
         username: sessionData.username || "",
-        form_link: sessionData.form_link || "",
-        powerbi_link: sessionData.powerbi_link || ""
+        form_link1: sessionData.form_link1 || "",
+        form_link2: sessionData.form_link2 || "",
+        form_link3: sessionData.form_link3 || "",
+        powerbi_link: sessionData.powerbi_link || "",
       };
 
       console.log("Usuario logueado:", fullUser);

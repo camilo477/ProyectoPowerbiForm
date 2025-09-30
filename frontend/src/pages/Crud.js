@@ -11,7 +11,9 @@ export default function Crud() {
   const [formData, setFormData] = useState({
     username: "",
     email: "",
-    form_link: "",
+    form_link1: "",
+    form_link2: "",
+    form_link3: "",
     powerbi_link: "",
   });
 
@@ -21,9 +23,12 @@ export default function Crud() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/accounts/users/", {
-        credentials: "include",
-      });
+      const response = await fetch(
+        "http://127.0.0.1:8000/api/accounts/users/",
+        {
+          credentials: "include",
+        }
+      );
       if (!response.ok) throw new Error("Error al obtener usuarios");
       const data = await response.json();
       setUsers(data);
@@ -41,10 +46,13 @@ export default function Crud() {
   const handleDelete = async (id) => {
     if (!window.confirm("¿Estás seguro de eliminar este usuario?")) return;
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/accounts/users/${id}/`, {
-        method: "DELETE",
-        credentials: "include",
-      });
+      const response = await fetch(
+        `http://127.0.0.1:8000/api/accounts/users/${id}/`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        }
+      );
       if (!response.ok) throw new Error("Error al eliminar usuario");
       setUsers(users.filter((u) => u.id !== id));
     } catch (err) {
@@ -52,19 +60,28 @@ export default function Crud() {
     }
   };
 
-  const handleEdit = (user) => {
-    setEditingUserId(user.id);
+  const handleEdit = (u) => {
+    setEditingUserId(u.id);
     setFormData({
-      username: user.username,
-      email: user.email,
-      form_link: user.profile?.form_link || "",
-      powerbi_link: user.profile?.powerbi_link || "",
+      username: u.username,
+      email: u.email,
+      form_link1: u.profile?.form_link1 || "",
+      form_link2: u.profile?.form_link2 || "",
+      form_link3: u.profile?.form_link3 || "",
+      powerbi_link: u.profile?.powerbi_link || "",
     });
   };
 
   const handleCancel = () => {
     setEditingUserId(null);
-    setFormData({ username: "", email: "", form_link: "", powerbi_link: "" });
+    setFormData({
+      username: "",
+      email: "",
+      form_link1: "",
+      form_link2: "",
+      form_link3: "",
+      powerbi_link: "",
+    });
   };
 
   const handleSave = async () => {
@@ -79,7 +96,9 @@ export default function Crud() {
             username: formData.username,
             email: formData.email,
             profile: {
-              form_link: formData.form_link,
+              form_link1: formData.form_link1,
+              form_link2: formData.form_link2,
+              form_link3: formData.form_link3,
               powerbi_link: formData.powerbi_link,
             },
           }),
@@ -87,7 +106,8 @@ export default function Crud() {
       );
 
       const data = await response.json();
-      if (!response.ok) throw new Error(data.detail || "Error al actualizar usuario");
+      if (!response.ok)
+        throw new Error(data.detail || "Error al actualizar usuario");
 
       setUsers(users.map((u) => (u.id === editingUserId ? data : u)));
       handleCancel();
@@ -105,7 +125,7 @@ export default function Crud() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-neutral-light px-6 py-10">
-      <div className="bg-white p-8 rounded-2xl shadow-medium w-full max-w-5xl">
+      <div className="bg-white p-8 rounded-2xl shadow-medium w-full max-w-6xl">
         <button
           onClick={() => navigate(-1)}
           className="mb-6 bg-neutral text-white px-5 py-2 rounded-lg shadow-soft hover:bg-neutral-light transition font-semibold"
@@ -129,7 +149,9 @@ export default function Crud() {
                   <th className="px-4 py-3">ID</th>
                   <th className="px-4 py-3">Username</th>
                   <th className="px-4 py-3">Email</th>
-                  <th className="px-4 py-3">Form Link</th>
+                  <th className="px-4 py-3">Form Link 1</th>
+                  <th className="px-4 py-3">Form Link 2</th>
+                  <th className="px-4 py-3">Form Link 3</th>
                   <th className="px-4 py-3">PowerBI Link</th>
                   <th className="px-4 py-3">Acciones</th>
                 </tr>
@@ -165,19 +187,51 @@ export default function Crud() {
                         u.email
                       )}
                     </td>
-                    <td className="px-4 py-2 break-words whitespace-pre-wrap max-w-xs">
+
+                    {/* Form Link 1 */}
+                    <td className="px-4 py-2 break-words max-w-xs">
                       {editingUserId === u.id ? (
                         <input
-                          name="form_link"
-                          value={formData.form_link}
+                          name="form_link1"
+                          value={formData.form_link1}
                           onChange={handleChange}
                           className="border px-2 py-1 rounded w-full"
                         />
                       ) : (
-                        u.profile?.form_link || "-"
+                        u.profile?.form_link1 || "-"
                       )}
                     </td>
-                    <td className="px-4 py-2 break-words whitespace-pre-wrap max-w-xs">
+
+                    {/* Form Link 2 */}
+                    <td className="px-4 py-2 break-words max-w-xs">
+                      {editingUserId === u.id ? (
+                        <input
+                          name="form_link2"
+                          value={formData.form_link2}
+                          onChange={handleChange}
+                          className="border px-2 py-1 rounded w-full"
+                        />
+                      ) : (
+                        u.profile?.form_link2 || "-"
+                      )}
+                    </td>
+
+                    {/* Form Link 3 */}
+                    <td className="px-4 py-2 break-words max-w-xs">
+                      {editingUserId === u.id ? (
+                        <input
+                          name="form_link3"
+                          value={formData.form_link3}
+                          onChange={handleChange}
+                          className="border px-2 py-1 rounded w-full"
+                        />
+                      ) : (
+                        u.profile?.form_link3 || "-"
+                      )}
+                    </td>
+
+                    {/* PowerBI Link */}
+                    <td className="px-4 py-2 break-words max-w-xs">
                       {editingUserId === u.id ? (
                         <input
                           name="powerbi_link"
@@ -189,6 +243,7 @@ export default function Crud() {
                         u.profile?.powerbi_link || "-"
                       )}
                     </td>
+
                     <td className="px-4 py-2 flex gap-2">
                       {editingUserId === u.id ? (
                         <>

@@ -1,29 +1,41 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
 const PowerBI = () => {
   const { user } = useContext(AuthContext);
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
+  const [formLinks, setFormLinks] = useState(null);
+
+  useEffect(() => {
+    const fetchLinks = async () => {
+      if (!user?.email) return;
+      try {
+        const res = await fetch(
+          `http://127.0.0.1:8000/api/accounts/user-links/?email=${user.email}`
+        );
+        const data = await res.json();
+        console.log("Form links recibidos:", data);
+        setFormLinks(data);
+      } catch (error) {
+        console.error("Error al obtener los links:", error);
+      }
+    };
+
+    fetchLinks();
+  }, [user]);
 
   if (!user) return <p>Cargando...</p>;
-
-  console.log("Usuario logeado:", user);
-  console.log("ID del usuario:", user.id);
-  console.log("Email del usuario:", user.email);
-  console.log("Link de Power BI del usuario:", user.powerbi_link);
 
   if (!user.powerbi_link) {
     return (
       <div className="flex flex-col justify-center items-center h-[90vh]">
-        {}
         <button
           onClick={() => navigate(-1)}
           className="mb-4 bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-800"
         >
           Volver
         </button>
-
         <p className="text-red-500 text-lg">
           No se encontró un link de Power BI para este usuario.
         </p>
@@ -35,9 +47,17 @@ const PowerBI = () => {
     );
   }
 
+  // Generar query params con los links para enviar a Streamlit
+  const queryParams = formLinks
+    ? `?form1=${encodeURIComponent(
+        formLinks.form_link1
+      )}&form2=${encodeURIComponent(
+        formLinks.form_link2
+      )}&form3=${encodeURIComponent(formLinks.form_link3)}`
+    : "";
+
   return (
-    <div style={{ height: "90vh", width: "100%" }} className="flex flex-col">
-      {}
+    <div className="flex flex-col h-[90vh]">
       <button
         onClick={() => navigate(-1)}
         className="mb-2 bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-800 self-start"
@@ -45,14 +65,21 @@ const PowerBI = () => {
         Volver
       </button>
 
-      <iframe
-        title="Power BI Report"
-        width="100%"
-        height="100%"
-        src={user.powerbi_link}
-        frameBorder="0"
-        allowFullScreen={true}
-      />
+      <div className="flex flex-row flex-1 gap-2">
+        {/* PowerBI */}
+        <iframe
+          title="Power BI Report"
+          src={user.powerbi_link}
+          className="flex-1 border rounded"
+          allowFullScreen
+        />
+
+        <iframe
+          title="IA Streamlit"
+          src={`http://localhost:8501/?email=${user.email}`}
+          className="flex-1 border rounded"
+        />
+      </div>
     </div>
   );
 };

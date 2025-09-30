@@ -7,7 +7,9 @@ export default function Register() {
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [formLink, setFormLink] = useState("");
+  const [formLink1, setFormLink1] = useState("");
+  const [formLink2, setFormLink2] = useState("");
+  const [formLink3, setFormLink3] = useState("");
   const [powerbiLink, setPowerbiLink] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -33,7 +35,9 @@ export default function Register() {
           email,
           username,
           password,
-          form_link: formLink,
+          form_link1: formLink1,
+          form_link2: formLink2,
+          form_link3: formLink3,
           powerbi_link: powerbiLink,
         }),
       });
@@ -45,7 +49,9 @@ export default function Register() {
         setEmail("");
         setUsername("");
         setPassword("");
-        setFormLink("");
+        setFormLink1("");
+        setFormLink2("");
+        setFormLink3("");
         setPowerbiLink("");
       } else {
         setError(data.error || "Ocurrió un error al registrar el usuario");
@@ -61,7 +67,7 @@ export default function Register() {
         onSubmit={handleSubmit}
         className="bg-white p-8 rounded-xl shadow-soft w-full max-w-md"
       >
-        {}
+        {/* Botón volver */}
         <button
           type="button"
           onClick={() => navigate(-1)}
@@ -75,12 +81,15 @@ export default function Register() {
         </h1>
 
         {success && (
-          <p className="text-green-600 mb-3 text-center font-medium">{success}</p>
+          <p className="text-green-600 mb-3 text-center font-medium">
+            {success}
+          </p>
         )}
         {error && (
           <p className="text-red-600 mb-3 text-center font-medium">{error}</p>
         )}
 
+        {/* Campos básicos */}
         <input
           type="email"
           placeholder="Correo electrónico"
@@ -105,13 +114,31 @@ export default function Register() {
           className="border p-2 mb-4 w-full rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
           required
         />
+
+        {/* 3 Formularios */}
         <input
           type="url"
-          placeholder="Link del formulario"
-          value={formLink}
-          onChange={(e) => setFormLink(e.target.value)}
+          placeholder="Link del formulario 1"
+          value={formLink1}
+          onChange={(e) => setFormLink1(e.target.value)}
           className="border p-2 mb-4 w-full rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
         />
+        <input
+          type="url"
+          placeholder="Link del formulario 2"
+          value={formLink2}
+          onChange={(e) => setFormLink2(e.target.value)}
+          className="border p-2 mb-4 w-full rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+        />
+        <input
+          type="url"
+          placeholder="Link del formulario 3"
+          value={formLink3}
+          onChange={(e) => setFormLink3(e.target.value)}
+          className="border p-2 mb-4 w-full rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+        />
+
+        {/* PowerBI */}
         <input
           type="url"
           placeholder="Link Power BI"

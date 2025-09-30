@@ -20,36 +20,66 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
-@api_view(['GET'])
-def session_view(request):
-    email = request.query_params.get('email')
+@api_view(["GET"])
+def user_links(request):
+    email = request.GET.get("email")
     if not email:
-        return Response({"error": "Debe enviar un email"}, status=400)
-
-    query = """
-        SELECT u.id, u.email, u.username, u.is_superuser,
-               p.form_link, p.powerbi_link
-        FROM accounts_customuser u
-        LEFT JOIN accounts_normaluserprofile p ON u.id = p.user_id
-        WHERE u.email = %s
-    """
+        return Response({"error": "Email requerido"}, status=400)
 
     with connection.cursor() as cursor:
+        query = """
+            SELECT p.form_link1, p.form_link2, p.form_link3
+            FROM accounts_customuser u
+            LEFT JOIN accounts_normaluserprofile p ON u.id = p.user_id
+            WHERE u.email = %s
+        """
         cursor.execute(query, [email])
         row = cursor.fetchone()
 
     if row:
+        return Response({
+            "form_link1": row[0] or "",
+            "form_link2": row[1] or "",
+            "form_link3": row[2] or "",
+        })
+    return Response({"error": "Usuario no encontrado"}, status=404)
+
+@api_view(["GET"])
+def session_view(request):
+    email = request.GET.get("email")
+    if not email:
+        return Response({"success": False, "message": "Email requerido"}, status=400)
+
+    with connection.cursor() as cursor:
+        query = """
+            SELECT u.id, u.email, u.username, u.is_superuser,
+                   p.form_link1, p.form_link2, p.form_link3, p.powerbi_link
+            FROM accounts_customuser u
+            LEFT JOIN accounts_normaluserprofile p ON u.id = p.user_id
+            WHERE u.email = %s
+        """
+        cursor.execute(query, [email])
+        row = cursor.fetchone()
+
+        # 👇 Aquí agregas el debug
+        print("Resultado query:", row)
+
+    if row:
         user_data = {
-            "id": row[0],
-            "email": row[1],
-            "username": row[2],
-            "is_superuser": row[3],
-            "form_link": row[4] or "",
-            "powerbi_link": row[5] or ""
-        }
+    "id": row[0],
+    "email": row[1],
+    "username": row[2],
+    "is_superuser": row[3],
+    "form_link1": row[4] or "",
+    "form_link2": row[5] or "",
+    "form_link3": row[6] or "",
+    "powerbi_link": row[7] or "",
+}
+
         return Response({"success": True, **user_data})
-    else:
-        return Response({"error": "Usuario no encontrado"}, status=404)
+
+    return Response({"success": False, "message": "Usuario no encontrado"}, status=404)
+
 
 User = get_user_model()
 
@@ -126,11 +156,14 @@ class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
 class RegisterUserView(APIView):
 
     def post(self, request):
-
         email = request.data.get("email")
         username = request.data.get("username")
         password = request.data.get("password")
-        form_link = request.data.get("form_link")
+
+        # ahora recibimos 3 links de forms
+        form_link1 = request.data.get("form_link1")
+        form_link2 = request.data.get("form_link2")
+        form_link3 = request.data.get("form_link3")
         powerbi_link = request.data.get("powerbi_link")
 
         if User.objects.filter(username=username).exists():
@@ -139,6 +172,14 @@ class RegisterUserView(APIView):
         user = User.objects.create_user(username=username, email=email, password=password)
         user.save()
 
-        NormalUserProfile.objects.create(user=user, form_link=form_link, powerbi_link=powerbi_link)
+        # guardamos el perfil con los 3 formularios y el link de PowerBI
+        NormalUserProfile.objects.create(
+            user=user,
+            form_link1=form_link1,
+            form_link2=form_link2,
+            form_link3=form_link3,
+            powerbi_link=powerbi_link
+        )
 
         return Response({"message": "Usuario creado exitosamente"}, status=status.HTTP_201_CREATED)
+

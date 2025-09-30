@@ -7,6 +7,7 @@ from .views import (
     UserListView,
     UserDetailView,
     MyProfileView,
+    user_links,
 )
 from rest_framework_simplejwt.views import TokenRefreshView
 from .views import session_view
@@ -21,5 +22,7 @@ urlpatterns = [
     path("export/csv/", ExportUsersCSV.as_view(), name="export_users_csv"), 
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"), 
     path('powerbi-link/', session_view, name='powerbi-link'),
-
+    path("user-links/", user_links, name="user-links"),
 ]
+
+

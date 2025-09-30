@@ -8,63 +8,58 @@ const Resultados = () => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
   const [datos, setDatos] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [selectedForm, setSelectedForm] = useState("");
 
-  useEffect(() => {
-    if (!user || !user.form_link) {
-      setError("No se encontró un link de formulario para este usuario");
-      setLoading(false);
+  const fetchData = async (formLink) => {
+    if (!formLink) {
+      setError("Selecciona un formulario");
       return;
     }
 
-    const fetchData = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const sheetIdMatch = user.form_link.match(/[-\w]{25,}/);
-        if (!sheetIdMatch) throw new Error("ID de Google Sheet no válido");
+    setLoading(true);
+    setError(null);
 
-        const sheetId = sheetIdMatch[0];
-        const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
+    try {
+      const sheetIdMatch = formLink.match(/[-\w]{25,}/);
+      if (!sheetIdMatch) throw new Error("ID de Google Sheet no válido");
 
-        const response = await fetch(url);
-        const text = await response.text();
+      const sheetId = sheetIdMatch[0];
+      const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
 
-        if (!text.startsWith("/*O_o*/")) {
-          throw new Error("Formato inesperado en la respuesta");
-        }
+      const response = await fetch(url);
+      const text = await response.text();
 
-        const jsonText = text.substring(47, text.length - 2);
-        const data = JSON.parse(jsonText);
-
-        if (!data.table || !data.table.rows) {
-          throw new Error("No se encontraron datos en la hoja de cálculo");
-        }
-
-        const rows = data.table.rows.map((row) =>
-          row.c.map((cell) => cell?.v || "")
-        );
-        setDatos(rows);
-      } catch (err) {
-        console.error("Error al obtener los datos:", err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
+      if (!text.startsWith("/*O_o*/")) {
+        throw new Error("Formato inesperado en la respuesta");
       }
-    };
 
-    fetchData();
-  }, [user]);
+      const jsonText = text.substring(47, text.length - 2);
+      const data = JSON.parse(jsonText);
+
+      if (!data.table || !data.table.rows) {
+        throw new Error("No se encontraron datos en la hoja de cálculo");
+      }
+
+      const rows = data.table.rows.map((row) =>
+        row.c.map((cell) => cell?.v || "")
+      );
+      setDatos(rows);
+    } catch (err) {
+      console.error("Error al obtener los datos:", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const exportarCSV = () => {
     if (datos.length === 0) return;
     const csvContent = datos
       .map((row) => row.map((cell) => `"${cell}"`).join(","))
       .join("\n");
-    const blob = new Blob([csvContent], {
-      type: "text/csv;charset=utf-8;",
-    });
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
@@ -92,14 +87,37 @@ const Resultados = () => {
 
   if (!user) return <p className="text-center mt-10">Cargando usuario...</p>;
 
+  // 🔍 Debug: mostrar los links que trae el usuario
+  console.log("Usuario con formularios:", user);
+
+  // recolectamos los 3 formularios del usuario
+  const formularios = [
+    { id: "form_link1", url: user.form_link1 },
+    { id: "form_link2", url: user.form_link2 },
+    { id: "form_link3", url: user.form_link3 },
+  ].filter((f) => f.url);
+
   return (
     <div className="min-h-screen bg-neutral-light py-10 px-4">
       <div className="max-w-6xl mx-auto bg-white p-6 rounded-xl shadow-soft">
         <h2 className="text-3xl font-bold text-center text-primary mb-6">
-          Resultados del Formulario
+          Resultados de Formularios
         </h2>
 
-        {}
+        {/* Debug visible en pantalla */}
+        <div className="mb-4 p-4 bg-gray-100 rounded">
+          <p>
+            <strong>Form Link 1:</strong> {user.form_link1 || "No asignado"}
+          </p>
+          <p>
+            <strong>Form Link 2:</strong> {user.form_link2 || "No asignado"}
+          </p>
+          <p>
+            <strong>Form Link 3:</strong> {user.form_link3 || "No asignado"}
+          </p>
+        </div>
+
+        {/* Botón volver */}
         <div className="mb-6">
           <button
             onClick={() => navigate(-1)}
@@ -109,27 +127,47 @@ const Resultados = () => {
           </button>
         </div>
 
-        {}
-        <div className="mb-6 flex flex-col md:flex-row items-center justify-center gap-4">
-          <button
-            onClick={exportarCSV}
-            className="px-5 py-2 bg-green-600 text-white rounded-lg shadow-soft hover:bg-green-700 transition font-medium"
-          >
-            Descargar CSV
-          </button>
-          <button
-            onClick={exportarPDF}
-            className="px-5 py-2 bg-red-600 text-white rounded-lg shadow-soft hover:bg-red-700 transition font-medium"
-          >
-            Descargar PDF
-          </button>
-        </div>
+        {/* Selector de formulario */}
+        {formularios.length > 0 ? (
+          <div className="mb-6 flex flex-col md:flex-row items-center gap-4">
+            <select
+              value={selectedForm}
+              onChange={(e) => {
+                setSelectedForm(e.target.value);
+                fetchData(e.target.value);
+              }}
+              className="border px-3 py-2 rounded-lg"
+            >
+              <option value="">-- Selecciona un formulario --</option>
+              {formularios.map((f, idx) => (
+                <option key={f.id} value={f.url}>
+                  Formulario {idx + 1}
+                </option>
+              ))}
+            </select>
 
-        {}
-        {loading ? (
-          <p className="text-gray-500 text-lg text-center">
-            Cargando datos...
+            <button
+              onClick={exportarCSV}
+              className="px-5 py-2 bg-green-600 text-white rounded-lg shadow-soft hover:bg-green-700 transition font-medium"
+            >
+              Descargar CSV
+            </button>
+            <button
+              onClick={exportarPDF}
+              className="px-5 py-2 bg-red-600 text-white rounded-lg shadow-soft hover:bg-red-700 transition font-medium"
+            >
+              Descargar PDF
+            </button>
+          </div>
+        ) : (
+          <p className="text-red-600 text-center">
+            No se encontraron links de formularios para este usuario.
           </p>
+        )}
+
+        {/* Tabla de resultados */}
+        {loading ? (
+          <p className="text-gray-500 text-lg text-center">Cargando datos...</p>
         ) : error ? (
           <p className="text-red-600 text-lg text-center font-medium">
             Error: {error}
