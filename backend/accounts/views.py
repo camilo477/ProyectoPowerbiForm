@@ -61,7 +61,6 @@ def session_view(request):
         cursor.execute(query, [email])
         row = cursor.fetchone()
 
-        # 👇 Aquí agregas el debug
         print("Resultado query:", row)
 
     if row:
@@ -133,7 +132,7 @@ class ExportUsersCSV(APIView):
         response['Content-Disposition'] = 'attachment; filename="usuarios.csv"'
 
         writer = csv.writer(response)
-        writer.writerow(['ID', 'Username', 'Email'])  # encabezados
+        writer.writerow(['ID', 'Username', 'Email']) 
 
         for user in User.objects.all():
             writer.writerow([user.id, user.username, user.email])
@@ -159,8 +158,6 @@ class RegisterUserView(APIView):
         email = request.data.get("email")
         username = request.data.get("username")
         password = request.data.get("password")
-
-        # ahora recibimos 3 links de forms
         form_link1 = request.data.get("form_link1")
         form_link2 = request.data.get("form_link2")
         form_link3 = request.data.get("form_link3")
@@ -172,7 +169,6 @@ class RegisterUserView(APIView):
         user = User.objects.create_user(username=username, email=email, password=password)
         user.save()
 
-        # guardamos el perfil con los 3 formularios y el link de PowerBI
         NormalUserProfile.objects.create(
             user=user,
             form_link1=form_link1,

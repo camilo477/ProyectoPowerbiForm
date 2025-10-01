@@ -47,7 +47,6 @@ const PowerBI = () => {
     );
   }
 
-  // Generar query params con los links para enviar a Streamlit
   const queryParams = formLinks
     ? `?form1=${encodeURIComponent(
         formLinks.form_link1
@@ -66,7 +65,6 @@ const PowerBI = () => {
       </button>
 
       <div className="flex flex-row flex-1 gap-2">
-        {/* PowerBI */}
         <iframe
           title="Power BI Report"
           src={user.powerbi_link}

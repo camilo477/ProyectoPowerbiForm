@@ -87,10 +87,7 @@ const Resultados = () => {
 
   if (!user) return <p className="text-center mt-10">Cargando usuario...</p>;
 
-  // 🔍 Debug: mostrar los links que trae el usuario
   console.log("Usuario con formularios:", user);
-
-  // recolectamos los 3 formularios del usuario
   const formularios = [
     { id: "form_link1", url: user.form_link1 },
     { id: "form_link2", url: user.form_link2 },
@@ -104,7 +101,6 @@ const Resultados = () => {
           Resultados de Formularios
         </h2>
 
-        {/* Debug visible en pantalla */}
         <div className="mb-4 p-4 bg-gray-100 rounded">
           <p>
             <strong>Form Link 1:</strong> {user.form_link1 || "No asignado"}
@@ -117,7 +113,6 @@ const Resultados = () => {
           </p>
         </div>
 
-        {/* Botón volver */}
         <div className="mb-6">
           <button
             onClick={() => navigate(-1)}
@@ -127,7 +122,6 @@ const Resultados = () => {
           </button>
         </div>
 
-        {/* Selector de formulario */}
         {formularios.length > 0 ? (
           <div className="mb-6 flex flex-col md:flex-row items-center gap-4">
             <select
@@ -165,7 +159,6 @@ const Resultados = () => {
           </p>
         )}
 
-        {/* Tabla de resultados */}
         {loading ? (
           <p className="text-gray-500 text-lg text-center">Cargando datos...</p>
         ) : error ? (
