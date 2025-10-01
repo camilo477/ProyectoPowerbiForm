@@ -4,7 +4,7 @@ from django.db import models
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
         if not email:
-            raise ValueError("El email es obligatorio")
+            raise ValueError("email obligatorio")
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
         user.set_password(password)

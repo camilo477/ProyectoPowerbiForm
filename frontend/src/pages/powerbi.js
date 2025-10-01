@@ -15,7 +15,7 @@ const PowerBI = () => {
           `http://127.0.0.1:8000/api/accounts/user-links/?email=${user.email}`
         );
         const data = await res.json();
-        console.log("Form links recibidos:", data);
+        console.log("Links recibidos", data);
         setFormLinks(data);
       } catch (error) {
         console.error("Error al obtener los links:", error);

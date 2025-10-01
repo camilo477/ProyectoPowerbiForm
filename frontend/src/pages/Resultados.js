@@ -32,7 +32,7 @@ const Resultados = () => {
       const text = await response.text();
 
       if (!text.startsWith("/*O_o*/")) {
-        throw new Error("Formato inesperado en la respuesta");
+        throw new Error("Formato inesperado");
       }
 
       const jsonText = text.substring(47, text.length - 2);

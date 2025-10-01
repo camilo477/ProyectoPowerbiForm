@@ -22,7 +22,7 @@ export default function Register() {
     setSuccess("");
 
     if (!user?.is_superuser) {
-      setError("Solo superusuarios pueden registrar usuarios normales");
+      setError("Solo los superusuarios pueden registrar usuarios normales");
       return;
     }
 
